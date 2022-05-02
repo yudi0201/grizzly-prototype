@@ -45,10 +45,12 @@ int main(int argc, const char *argv[]) {
                       .addFixSizeField("payload", DataType::Double, Stream);
 
   Query::generate(config, schema, path)
-      // defines a filter operator with a >= predicate on  the field auction
-      .filter(new GreaterEqual("payload", 0))
-      // prints the output stream to the console
-      .print()
+//	.map(Add("payload", "3"))
+      //.filter(new GreaterEqual("payload", 0))
+      .window(TumblingProcessingTimeWindow(Time::seconds(1)))
+      .aggregate(Avg("payload"))
+      // prints output stream to console
+      //.print()
       .execute();
 
   return 0;
