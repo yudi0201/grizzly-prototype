@@ -72,8 +72,9 @@ add_library(grizzly-lib ${GRIZZLY_SOURCE_FILES} ${GRIZZLY_HEADER_FILES})
 target_include_directories(grizzly-lib PUBLIC "include")
 
 add_executable(grizzly start.cpp ${Grizzly_HEADER_FILES})
-
 target_link_libraries(grizzly grizzly-lib ${LIBRARIES})
+add_executable(grizzly_bench bench.cpp ${Grizzly_HEADER_FILES})
+target_link_libraries(grizzly_bench grizzly-lib ${LIBRARIES})
 
 # Make directories for generated code + copy runtime
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated-code)
