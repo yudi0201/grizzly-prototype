@@ -31,6 +31,7 @@ public:
     std::cout << "bufferSize" << bufferSize << " runLength" << runLength << " run buffers " << bufferRuns << std::endl;
     std::string papi_conf_file = "papi_conf_global.cfg";
     std::string config = "Branch_Preset";
+    pending.fetch_and_store(parallelism * bufferRuns);
   }
 
   virtual void loadData() = 0;
@@ -70,6 +71,7 @@ public:
 
   void *getWork(int thread_id, int run) {
     buffersProcessed++;
+    pending--;
     void *t = buffer[thread_id][run];
     return t;
   }
@@ -77,7 +79,7 @@ public:
   bool hasWork() {
     // TODO: add if file is empty
     // TODO: add if file was read entirely
-    return true;
+    return pending > 0;
   }
 
   void stop() { stopped = true; }
@@ -97,6 +99,7 @@ public:
   int *numa_relation;
   std::string file;
   tbb::atomic<size_t> buffersProcessed = 0;
+  tbb::atomic<size_t> pending;
 
 protected:
   void readBinaryFileIntoBuffer(size_t thread_id) {

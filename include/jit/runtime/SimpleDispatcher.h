@@ -6,8 +6,6 @@ public:
                    unsigned int tupleSize, std::string file, int numa)
       : Dispatcher(runLength, parallelism, bufferSize, runs, tupleSize, file, numa) {
     loadData();
-    std::thread t = std::thread(Dispatcher::throughputLogger, this);
-    t.detach();
   }
 
   void loadData() {

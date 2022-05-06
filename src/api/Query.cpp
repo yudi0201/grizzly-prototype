@@ -65,6 +65,11 @@ void Query::execute() {
   jitExecutionRuntime->execute(this);
 }
 
+long Query::run() {
+  auto jitExecutionRuntime = new JITExecutionRuntime();
+  return jitExecutionRuntime->run(this);
+}
+
 /*
  * Relational Operators
  */

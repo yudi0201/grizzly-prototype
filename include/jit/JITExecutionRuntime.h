@@ -14,6 +14,7 @@ public:
   JITExecutionRuntime();
   void deoptimize(Variant *variant, void *buffer, int position);
   void execute(Query *query);
+  long run(Query *query);
   bool isRunning();
   void monitor(int threadID) override;
 

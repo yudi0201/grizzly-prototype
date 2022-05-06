@@ -18,6 +18,7 @@ public:
   static Query generate(Config &config, Schema &schema, std::string path);
   void generate();
   void execute();
+  long run();
 
   // relational operators
   Query &filter(Predicate &&predicate) { return filter(predicate); };
