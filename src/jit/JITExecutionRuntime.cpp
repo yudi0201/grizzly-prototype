@@ -174,8 +174,13 @@ long JITExecutionRuntime::run(Query *query) {
   auto start = std::chrono::high_resolution_clock::now();
 
   /* Launch a group of threads. */
+  auto *t = new std::thread[dispatcher->parallelism];
   for (size_t i = 0; i < dispatcher->parallelism; i++) {
-    variant->execute(i, 0);
+    t[i] = std::thread([](Variant* var, size_t tid) { var->execute(tid, 0); }, variant, i);
+  }
+
+  for (size_t i = 0; i < dispatcher->parallelism; i++) {
+    t[i].join();
   }
 
   auto end = std::chrono::high_resolution_clock::now();
