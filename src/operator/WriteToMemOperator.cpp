@@ -20,16 +20,10 @@ void WriteToMemOperator::consume(CodeGenerator &cg) {
   std::stringstream statements;
   cg.ctx(cg.currentPipeline()).outputSchema.print();
 
-  for (auto f : cg.ctx(cg.currentPipeline()).outputSchema.fields) {
-    statements << "buffer[thread_id]." << f.name << "=record." << f.name << ";" << std::endl;
-  }
-
-  cg.generateStruct(cg.ctx(cg.currentPipeline()).outputSchema, "output", cg.currentPipeline(), false);
+  statements << "buffers[thread_id].push_back(record);" << std::endl;
 
   std::stringstream intBufferStatement;
-  intBufferStatement << "auto buffer = (output" << cg.currentPipeline() << "*) malloc (sizeof(output"
-                     << cg.currentPipeline() << ")*1000);";
-  intBufferStatement << "int b_i = 0;";
+  intBufferStatement << "auto buffers = tbb::concurrent_unordered_map<int, std::vector<record" << cg.currentPipeline() << ">>();";
   cg.file.addStatement(intBufferStatement.str());
 
   statements << std::endl;

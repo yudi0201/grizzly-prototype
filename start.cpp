@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) {
       // adds a avg aggregation on the price
       .aggregate(Avg("price"))
       // prints the output stream to the console
-      .print()
+      .toOutputBuffer()
       .run();
 
   std::cout << "Time: " << time << std::endl;
