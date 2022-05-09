@@ -480,3 +480,83 @@ void Avg::consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator) {
              << "((double)record." << fieldId << "_sum) / ((double)record.count);";
   cg.pipeline(pipeline - 1).addInstruction(CMethod::Instruction(INSTRUCTION_AGGREGATE, statements.str()));
 }
+
+bool CustomAvg::hasFinalAggregation() { return true; }
+
+/*
+ * CustomAvg
+ */
+void CustomAvg::produce(CodeGenerator &cg, Operator *input) {
+  // add three fields to schema (save count and sum to calculate avg later)
+  Schema schema = Schema::create()
+                      .addFixSizeField("payload_avg", DataType::Double, Stream)
+                      .addFixSizeField("payload_sum", DataType::Long, Stream)
+                      .addFixSizeField("count", DataType::Long, Stream)
+                      .addFixSizeField("window_start", DataType::Long, Stream)
+                      .addFixSizeField("window_end", DataType::Long, Stream);
+
+  produce_(cg, input, schema);
+  createState(cg, input, schema);
+  migrateFrom(cg, input, schema);
+  migrateTo(cg, input, schema);
+  addStatePtr(cg, input, schema);
+}
+
+void CustomAvg::consume(CodeGenerator &cg, Operator *parent) {
+
+  consume_(cg, parent);
+  std::stringstream statements;
+  statements << "auto payload = record.payload; ";
+  statements << "auto start_time = record.start_time; ";
+  statements << "auto end_time = record.end_time; ";
+
+  std::stringstream oldValue;
+  if (cg.config.getNuma()) {
+    oldValue << "state" << std::to_string(pipeline) << "[bufferIndex][key]";
+  } else {
+    if (cg.ctx(pipeline).hasGroupBy) {
+      oldValue << "state" << std::to_string(pipeline) << "[bufferIndex][key]";
+    } else {
+      oldValue << "state" << std::to_string(pipeline) << "[bufferIndex]";
+    }
+  }
+
+  statements << oldValue.str() << ".count++;" << std::endl;
+  statements << oldValue.str() << ".payload_sum += payload;" << std::endl;
+
+  statements << "long old_start; do {\n"
+                "// Take a snapshot\n"
+                "old_start = "
+             << oldValue.str() << ".window_start;"
+             << ";\n"
+                "// Quit if snapshot meets condition.\n"
+                "if( old_start<=start_time ) break;\n"
+                "// Attempt to install new value.\n"
+                "} while( "
+             << oldValue.str() << ".window_start.compare_and_swap(start_time,old_start)!=old_start);";
+
+  statements << "long old_end; do {\n"
+                "// Take a snapshot\n"
+                "old_end = "
+             << oldValue.str() << ".window_end;"
+             << ";\n"
+                "// Quit if snapshot meets condition.\n"
+                "if( old_end>=end_time ) break;\n"
+                "// Attempt to install new value.\n"
+                "} while( "
+             << oldValue.str() << ".window_end.compare_and_swap(end_time,old_end)!=old_end);";
+
+  cg.pipeline(pipeline).addInstruction(CMethod::Instruction(INSTRUCTION_AGGREGATE, statements.str()));
+  if (parent != nullptr) {
+    parent->consume(cg);
+  }
+}
+
+void CustomAvg::consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator) {
+  std::stringstream statements;
+  statements << "if(record.count != 0)";
+  statements << "record.payload_avg"
+             << " = "
+             << "((double)record.payload_sum) / ((double)record.count);";
+  cg.pipeline(pipeline - 1).addInstruction(CMethod::Instruction(INSTRUCTION_AGGREGATE, statements.str()));
+}
