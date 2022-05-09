@@ -68,7 +68,6 @@ target_include_directories(grizzly-lib PUBLIC "include")
 
 add_executable(grizzly start.cpp ${Grizzly_HEADER_FILES})
 target_link_libraries(grizzly grizzly-lib ${LIBRARIES})
-
 add_executable(grizzly_bench bench.cpp ${Grizzly_HEADER_FILES})
 target_link_libraries(grizzly_bench grizzly-lib ${LIBRARIES})
 
