@@ -44,7 +44,12 @@ public:
   Add(std::string fieldId, Field &value) : Mapper(fieldId, value) {}
   Add(std::string fieldId, Field &value, std::string outputField) : Mapper(fieldId, value, outputField) {}
 
-  void consume(CodeGenerator &cg, Operator *parent) {}
+  void consume(CodeGenerator &cg, Operator *parent) {
+    std::stringstream statements;
+
+    statements << "record." << fieldId << "+=" << value << ";" << std::endl;
+    cg.pipeline(pipeline).addInstruction(CMethod::Instruction(INSTRUCTION_PRINT, statements.str()));
+  }
 };
 
 // subtract a value from a field or subtract one field from another
