@@ -50,7 +50,7 @@ int main(int argc, const char *argv[]) {
       .window(TumblingProcessingTimeWindow(Time::seconds(1)))
       .aggregate(Avg("payload"))
       // prints output stream to console
-      //.print()
+      .print()
       .execute();
 
   return 0;
