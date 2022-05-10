@@ -50,7 +50,7 @@ int main(int argc, const char *argv[])
   } else if (testcase == "aggregate") {
     Query::generate(config, schema, path)
         .window(TumblingProcessingTimeWindow(Time::seconds(1)))
-        .aggregate(Avg("payload"))
+        .aggregate(CustomAvg())
         .toOutputBuffer()
         .run();
   } else if (testcase == "alterdur") {
