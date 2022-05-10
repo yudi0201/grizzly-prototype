@@ -5,21 +5,14 @@
 #include "code_generation/CodeGenerator.h"
 #include <string>
 
-int main(int argc, const char *argv[]) {
-
-  if(argc != 5){
-    std::cout << "Please provide the right argument. "
-                 "1. parallelism, "
-                 "2. buffer size in tuple, "
-                 "3. execution duration for the query, "
-                 "4. path to input data" << std::endl;
-    return -1;
-  }
-
-  auto parallelism = std::stoi(argv[1]);
-  auto bufferSize = std::stoi(argv[2]);
-  auto experimentDuration = std::stoi(argv[3]);
-  auto path = argv[4];
+int main(int argc, const char *argv[])
+{
+  auto testcase = (argc > 1) ? argv[1] : "select";
+  auto parallelism = (argc > 2) ? std::stoi(argv[2]) : 1;
+  auto bufferSize = (argc > 3) ? std::stoi(argv[3]) : 10000000;
+  auto experimentDuration = (argc > 4) ? std::stoi(argv[4]) : 10;
+  auto path = (argc > 5) ? argv[5] : "../data-generator/test_data.bin";
+  auto period = 1;
 
   Config config = Config::create()
                       // configures the number of worker threads
@@ -44,14 +37,30 @@ int main(int argc, const char *argv[]) {
                       .addFixSizeField("end_time", DataType::Long, Stream)
                       .addFixSizeField("payload", DataType::Double, Stream);
 
-  Query::generate(config, schema, path)
-//	.map(Add("payload", "3"))
-      //.filter(new GreaterEqual("payload", 0))
-      .window(TumblingProcessingTimeWindow(Time::seconds(1)))
-      .aggregate(Avg("payload"))
-      // prints output stream to console
-      //.print()
-      .execute();
+  if (testcase == "select") {
+    Query::generate(config, schema, path)
+        .map(Add("payload", 3))
+        .toOutputBuffer()
+        .run();
+  } else if (testcase == "where") {
+    Query::generate(config, schema, path)
+        .filter(new GreaterEqual("payload", 0))
+        .toOutputBuffer()
+        .run();
+  } else if (testcase == "aggregate") {
+    Query::generate(config, schema, path)
+        .window(TumblingProcessingTimeWindow(Time::seconds(1)))
+        .aggregate(Avg("payload"))
+        .toOutputBuffer()
+        .run();
+  } else if (testcase == "alterdur") {
+    Query::generate(config, schema, path)
+        .map(Add("start_time", 10 * period, "end_time"))
+        .toOutputBuffer()
+        .run();
+  } else {
+    throw std::runtime_error("Invalid testcase");
+  }
 
   return 0;
 }

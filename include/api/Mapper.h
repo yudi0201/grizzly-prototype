@@ -5,6 +5,7 @@
 
 #include "api/Field.h"
 #include "operator/Operator.h"
+#include <sstream>
 
 class Mapper {
 public:
