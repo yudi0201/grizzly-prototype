@@ -181,8 +181,8 @@ Query &Query::print() {
   return *this;
 }
 
-Query &Query::toOutputBuffer() {
-  Operator *newOp = new WriteToMemOperator(current);
+Query &Query::toOutputBuffer(bool print) {
+  Operator *newOp = new WriteToMemOperator(current, print);
   if (current)
     newOp->rightChild = current;
   root = newOp;

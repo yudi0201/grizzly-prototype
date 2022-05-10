@@ -47,7 +47,7 @@ public:
   Operator *root;
   Operator *getInputOperator() { return root; }
 
-  Query &toOutputBuffer();
+  Query &toOutputBuffer(bool print = false);
   Schema &schema;
   Config &config;
   Operator *current;

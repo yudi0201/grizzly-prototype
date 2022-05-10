@@ -194,6 +194,18 @@ CCode CodeGenerator::generateStruct(Schema &schema, std::string name, size_t id,
     }
   }
 
+  builder.addStatement("std::string to_string() {");
+  std::stringstream statements;
+  statements << "return ";
+  statements << "std::string(\"(\")";
+  for (auto it = schema.fields.begin(); it != schema.fields.end(); ++it) {
+    const Field &field = *it;
+    statements << " + \"" << field.name << "=\" + std::to_string(" << field.name << ") + \", \"";
+  }
+  statements << " + \")\";";
+  builder.addStatement(statements.str());
+  builder.addStatement("}");
+
   builder.addStatement("};");
   auto code = builder.build();
   this->schemaStructs.push_back(code);

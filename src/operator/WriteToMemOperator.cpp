@@ -3,7 +3,7 @@
 
 #include "operator/WriteToMemOperator.h"
 
-WriteToMemOperator::WriteToMemOperator(Operator *input) : input(input) {
+WriteToMemOperator::WriteToMemOperator(Operator *input, bool print) : input(input), print(print) {
   leftChild = NULL;
   rightChild = NULL;
   name = "WriteToMem";
@@ -21,6 +21,9 @@ void WriteToMemOperator::consume(CodeGenerator &cg) {
   cg.ctx(cg.currentPipeline()).outputSchema.print();
 
   statements << "buffers[thread_id].push_back(record);" << std::endl;
+  if (print) {
+    statements << "std::cout << record.to_string() << std::endl;" << std::endl;
+  }
 
   std::stringstream intBufferStatement;
   intBufferStatement << "auto buffers = tbb::concurrent_unordered_map<int, std::vector<record" << cg.currentPipeline() << ">>();";
