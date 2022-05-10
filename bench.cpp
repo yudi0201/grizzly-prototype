@@ -7,12 +7,12 @@
 
 int main(int argc, const char *argv[])
 {
-  auto testcase = (argc > 1) ? argv[1] : "select";
-  auto parallelism = (argc > 2) ? std::stoi(argv[2]) : 1;
-  auto bufferSize = (argc > 3) ? std::stoi(argv[3]) : 10000000;
-  auto experimentDuration = (argc > 4) ? std::stoi(argv[4]) : 10;
-  auto path = (argc > 5) ? argv[5] : "../data-generator/test_data.bin";
-  auto period = 1;
+  std::string testcase = (argc > 1) ? argv[1] : "select";
+  int parallelism = (argc > 2) ? std::stoi(argv[2]) : 1;
+  long bufferSize = (argc > 3) ? std::stoi(argv[3]) : 10000000;
+  int experimentDuration = (argc > 4) ? std::stoi(argv[4]) : 10;
+  std::string path = (argc > 5) ? argv[5] : "../data-generator/test_data.bin";
+  int period = 1;
 
   Config config = Config::create()
                       // configures the number of worker threads
@@ -38,29 +38,31 @@ int main(int argc, const char *argv[])
                       .addFixSizeField("payload", DataType::Double, Stream);
 
   if (testcase == "select") {
-    Query::generate(config, schema, path)
+    auto time = Query::generate(config, schema, path)
         .map(Add("payload", 3))
         .toOutputBuffer()
         .run();
   } else if (testcase == "where") {
-    Query::generate(config, schema, path)
+    auto time = Query::generate(config, schema, path)
         .filter(new GreaterEqual("payload", 0))
         .toOutputBuffer()
         .run();
   } else if (testcase == "aggregate") {
-    Query::generate(config, schema, path)
+    auto time = Query::generate(config, schema, path)
         .window(TumblingProcessingTimeWindow(Time::seconds(1)))
         .aggregate(CustomAvg())
         .toOutputBuffer()
         .run();
   } else if (testcase == "alterdur") {
-    Query::generate(config, schema, path)
+    auto time = Query::generate(config, schema, path)
         .map(Add("start_time", 10 * period, "end_time"))
         .toOutputBuffer()
         .run();
   } else {
     throw std::runtime_error("Invalid testcase");
   }
+
+  std::cout << "Time: " << time << std::endl;
 
   return 0;
 }
