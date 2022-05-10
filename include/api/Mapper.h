@@ -1,6 +1,8 @@
 #ifndef API_MAPPER_H
 #define API_MAPPER_H
 
+#include <sstream>
+
 #include "api/Field.h"
 #include "operator/Operator.h"
 
@@ -21,11 +23,20 @@ public:
 
   std::string to_string() { return "Map Field: " + fieldId + "  on " + value + " with " + outputField; }
 
-  virtual void produce(CodeGenerator &cg, Operator *input) {
+  void produce(CodeGenerator &cg, Operator *input) {
     pipeline = cg.currentPipeline();
     input->produce(cg);
   };
-  virtual void consume(CodeGenerator &cg, Operator *parent) = 0;
+
+  void consume(CodeGenerator &cg, Operator *parent) {
+    std::stringstream statements;
+    statements << "record." << outputField << " = record." << fieldId << op_str() << value << ";";
+    cg.pipeline(pipeline).addInstruction(CMethod::Instruction(INSTRUCTION_PRINT, statements.str()));
+    parent->consume(cg);
+  }
+
+  virtual std::string op_str() = 0;
+
   size_t pipeline;
 
 protected:
@@ -44,7 +55,7 @@ public:
   Add(std::string fieldId, Field &value) : Mapper(fieldId, value) {}
   Add(std::string fieldId, Field &value, std::string outputField) : Mapper(fieldId, value, outputField) {}
 
-  void consume(CodeGenerator &cg, Operator *parent) {}
+  std::string op_str() override { return "+"; }
 };
 
 // subtract a value from a field or subtract one field from another
@@ -57,7 +68,7 @@ public:
   Subtract(std::string fieldId, Field &value) : Mapper(fieldId, value) {}
   Subtract(std::string fieldId, Field &value, std::string outputField) : Mapper(fieldId, value, outputField) {}
 
-  void consume(CodeGenerator &cg, Operator *parent) {}
+  std::string op_str() override { return "-"; }
 };
 
 // divides two fields or divides a field by a value
@@ -70,7 +81,7 @@ public:
   Divide(std::string fieldId, Field &value) : Mapper(fieldId, value) {}
   Divide(std::string fieldId, Field &value, std::string outputField) : Mapper(fieldId, value, outputField) {}
 
-  void consume(CodeGenerator &cg, Operator *parent) {}
+  std::string op_str() override { return "/"; }
 };
 
 // concatinates two (string) fields
@@ -81,7 +92,7 @@ public:
   Concat(std::string fieldId, Field &value) : Mapper(fieldId, value) {}
   Concat(std::string fieldId, Field &value, std::string outputField) : Mapper(fieldId, value, outputField) {}
 
-  void consume(CodeGenerator &cg, Operator *parent) {}
+  std::string op_str() override { return "+"; }
 };
 
 #endif // API_MAPPER_H
