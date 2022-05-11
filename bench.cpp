@@ -37,24 +37,25 @@ int main(int argc, const char *argv[])
                       .addFixSizeField("end_time", DataType::Long, Stream)
                       .addFixSizeField("payload", DataType::Double, Stream);
 
+  long time;
   if (testcase == "select") {
-    auto time = Query::generate(config, schema, path)
+    time = Query::generate(config, schema, path)
         .map(Add("payload", 3))
         .toOutputBuffer()
         .run();
   } else if (testcase == "where") {
-    auto time = Query::generate(config, schema, path)
+    time = Query::generate(config, schema, path)
         .filter(new GreaterEqual("payload", 0))
         .toOutputBuffer()
         .run();
   } else if (testcase == "aggregate") {
-    auto time = Query::generate(config, schema, path)
+    time = Query::generate(config, schema, path)
         .window(TumblingProcessingTimeWindow(Time::seconds(1)))
         .aggregate(CustomAvg())
         .toOutputBuffer()
         .run();
   } else if (testcase == "alterdur") {
-    auto time = Query::generate(config, schema, path)
+    time = Query::generate(config, schema, path)
         .map(Add("start_time", 10 * period, "end_time"))
         .toOutputBuffer()
         .run();
