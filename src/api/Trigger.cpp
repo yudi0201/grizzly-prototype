@@ -61,7 +61,7 @@ void ProcessingTimeTrigger::onBeforeAssign(CodeGenerator &cg, size_t pipeline) {
   // trigger meta-data (timestamp, when each window needs to be triggered)
   std::string key = "";
 
-  statements << "int64_t ts = time(NULL);\n" << std::endl;
+  statements << "int64_t ts = i;\n" << std::endl;
   statements << "if (ts >= thread_local_state->windowEnds[thread_local_state->current_window]) {"
              << "size_t old_window = thread_local_state->current_window;\n"
              << "// change the window state of this thread -> so from now on it will put tuple to the next window \n"

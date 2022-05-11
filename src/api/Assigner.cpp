@@ -34,7 +34,7 @@ void TumblingProcessingTimeAssigner::consume(CodeGenerator &cg) {
   statementsInit << "{g->window_state[" + strPipeline + "] = new WindowState{};\n"
                  << "auto window_state = g->window_state[" + strPipeline + "];\n"
                  << "window_state->thread_local_state = new ThreadLocalState*[dispatcher->parallelism];\n"
-                 << "size_t ts = time(NULL);\n"
+                 << "size_t ts = 0;\n"
                  << "for (size_t thread_ID = 0; thread_ID < dispatcher->parallelism; thread_ID++) {\n";
   if (cg.config.getNuma()) {
     statementsInit << "int node = dispatcher->numa_relation[thread_ID];\n";
