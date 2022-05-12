@@ -33,7 +33,10 @@ public:
     std::stringstream statements;
     statements << "record." << outputField << " = record." << fieldId << op_str() << value << ";";
     cg.pipeline(pipeline).addInstruction(CMethod::Instruction(INSTRUCTION_PRINT, statements.str()));
-    parent->consume(cg);
+
+    if (parent != nullptr) {
+      parent->consume(cg);
+    }
   }
 
   virtual std::string op_str() = 0;
