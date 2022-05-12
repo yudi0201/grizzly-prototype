@@ -22,11 +22,6 @@ set(CMAKE_CXX_FLAGS "-Wall -lnuma -lpapi")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -lnuma -lpapi")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wextra -O3 -lnuma -lpapi")
 
-set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-set(CMAKE_HAVE_THREADS_LIBRARY 1)
-set(CMAKE_USE_WIN32_THREADS_INIT 0)
-set(CMAKE_USE_PTHREADS_INIT 1)
-
 # Compiler should produce specific code for system architecture
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
