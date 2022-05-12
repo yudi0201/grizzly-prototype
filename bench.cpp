@@ -50,7 +50,7 @@ int main(int argc, const char *argv[])
         .run();
   } else if (testcase == "aggregate") {
     time = Query::generate(config, schema, path)
-        .window(TumblingProcessingTimeWindow(Time::seconds(1)))
+        .window(TumblingProcessingTimeWindow(Time::seconds(1000 * period)))
         .aggregate(CustomAvg())
         .toOutputBuffer()
         .run();
