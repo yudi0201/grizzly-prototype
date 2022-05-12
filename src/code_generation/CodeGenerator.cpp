@@ -190,7 +190,12 @@ CCode CodeGenerator::generateStruct(Schema &schema, std::string name, size_t id,
     if (field.size > 1) {
       builder.addStatement(type + " " + field.name + "[" + std::to_string(field.size) + "];");
     } else {
-      builder.addStatement(type + " " + field.name + ";");
+      if (field.default_value != "") {
+        builder.addStatement(type + " " + field.name + " = " + field.default_value + ";");
+      }
+      else {
+        builder.addStatement(type + " " + field.name + ";");
+      }
     }
   }
 

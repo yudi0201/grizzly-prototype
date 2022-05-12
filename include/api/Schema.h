@@ -10,6 +10,7 @@ class Schema {
 public:
   static Schema create();
   Schema &addFixSizeField(std::string name, DataType dataType, SourceType srcType);
+  Schema &addFixSizeField(std::string name, DataType dataType, SourceType srcType, std::string default_value);
   Schema &addVarSizeField(std::string name, DataType dataType, size_t dataSize, SourceType srcType);
   Field &get(std::string name);
   Schema &print();

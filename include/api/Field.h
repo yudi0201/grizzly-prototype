@@ -66,11 +66,12 @@ private:
 
 class Field {
 public:
-  Field(std::string name, DataType dataType, std::size_t dataSize, SourceType srcType);
+  Field(std::string name, DataType dataType, std::size_t dataSize, SourceType srcType, std::string default_value = "");
   std::string name;
   DataType dataType;
   std::size_t size;
   SourceType srcType;
+  std::string default_value;
 };
 
 #endif // API_FIELD_H

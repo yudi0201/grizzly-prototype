@@ -332,7 +332,7 @@ void Count::consume(CodeGenerator &cg, Operator *parent) {
  */
 void Min::produce(CodeGenerator &cg, Operator *input) {
   // add field to schema
-  Schema schema = Schema::create().addFixSizeField(fieldId + "_min", DataType::Long, Stream);
+  Schema schema = Schema::create().addFixSizeField(fieldId + "_min", DataType::Long, Stream, "LONG_MAX");
   produce_(cg, input, schema);
   createState(cg, input, schema);
   migrateFrom(cg, input, schema);
@@ -385,7 +385,7 @@ void Min::consume(CodeGenerator &cg, Operator *parent) {
  */
 void Max::produce(CodeGenerator &cg, Operator *input) {
   // add field to schema
-  Schema schema = Schema::create().addFixSizeField(fieldId + "_max", DataType::Long, Stream);
+  Schema schema = Schema::create().addFixSizeField(fieldId + "_max", DataType::Long, Stream, "LONG_MIN");
   produce_(cg, input, schema);
   createState(cg, input, schema);
   migrateFrom(cg, input, schema);
@@ -492,8 +492,8 @@ void CustomAvg::produce(CodeGenerator &cg, Operator *input) {
                       .addFixSizeField("payload_avg", DataType::Double, Stream)
                       .addFixSizeField("payload_sum", DataType::Long, Stream)
                       .addFixSizeField("count", DataType::Long, Stream)
-                      .addFixSizeField("window_start", DataType::Long, Stream)
-                      .addFixSizeField("window_end", DataType::Long, Stream);
+                      .addFixSizeField("window_start", DataType::Long, Stream, "LONG_MAX")
+                      .addFixSizeField("window_end", DataType::Long, Stream, "LONG_MIN");
 
   produce_(cg, input, schema);
   createState(cg, input, schema);

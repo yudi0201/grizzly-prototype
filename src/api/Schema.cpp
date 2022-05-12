@@ -11,8 +11,14 @@ size_t Schema::getInputSize() {
   return 78;
   // TODO:make it dynamic
 }
+
 Schema &Schema::addFixSizeField(std::string name, DataType dataType, SourceType srcType) {
   fields.push_back(Field(name, dataType, dataType.defaultSize(), srcType));
+  return *this;
+}
+
+Schema &Schema::addFixSizeField(std::string name, DataType dataType, SourceType srcType, std::string default_value) {
+  fields.push_back(Field(name, dataType, dataType.defaultSize(), srcType, default_value));
   return *this;
 }
 
