@@ -4,14 +4,15 @@
 #include "api/Schema.h"
 #include "code_generation/CodeGenerator.h"
 #include <string>
+#include <iomanip>
+#include <iostream>
 
 int main(int argc, const char *argv[])
 {
   std::string testcase = (argc > 1) ? argv[1] : "select";
-  int parallelism = (argc > 2) ? std::stoi(argv[2]) : 1;
-  long bufferSize = (argc > 3) ? std::stoi(argv[3]) : 10000000;
-  int experimentDuration = (argc > 4) ? std::stoi(argv[4]) : 10;
-  std::string path = (argc > 5) ? argv[5] : "../data-generator/test_data.bin";
+  long bufferSize = (argc > 2) ? std::stoi(argv[2]) : 10000000;
+  int parallelism = (argc > 3) ? std::stoi(argv[3]) : 1;
+  std::string path = (argc > 4) ? argv[4] : "../data-generator/test_data.bin";
   int period = 1;
 
   Config config = Config::create()
@@ -23,8 +24,6 @@ int main(int argc, const char *argv[])
                       // the number of records processed per pipeline invocation ->
                       // if this is equal to the buffer size the pipeline will always process the whole input buffer.
                       .withRunLength(bufferSize)
-                      // configures how many seconds the benchmark will be executed.
-                      .withBenchmarkRunDuration(experimentDuration)
                       // configures the time in ms the jit waits to switch to the next compilation stage.
                       .withCompilationDelay(4000)
                       // enables filter predicate optimizations
@@ -49,8 +48,9 @@ int main(int argc, const char *argv[])
         .toOutputBuffer()
         .run();
   } else if (testcase == "aggregate") {
+    long win_size = 1000;
     time = Query::generate(config, schema, path)
-        .window(TumblingProcessingTimeWindow(Time::seconds(1000 * period)))
+        .window(TumblingProcessingTimeWindow(Time::seconds(win_size / period)))
         .aggregate(CustomAvg())
         .toOutputBuffer()
         .run();
@@ -63,7 +63,7 @@ int main(int argc, const char *argv[])
     throw std::runtime_error("Invalid testcase");
   }
 
-  std::cout << "Time: " << time << std::endl;
+  std::cout << "Time: " << std::fixed << std::setprecision(3) << (double) time/1000000 << " seconds" << std::endl;
 
   return 0;
 }

@@ -29,11 +29,7 @@ int main(int argc, char *argv[])
               << std::endl;
     return -1;
   }
-  if (atoi(argv[1]) % 10 != 0) {
-    std::cout << "Number of tuples to be generated should be divisible by 10."
-              << std::endl;
-    return -1;
-  }
+
   size_t processCnt = atoi(argv[1]);
   size_t period = atoi(argv[2]);
 
