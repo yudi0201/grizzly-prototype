@@ -20,13 +20,16 @@ void WriteToMemOperator::consume(CodeGenerator &cg) {
   std::stringstream statements;
   cg.ctx(cg.currentPipeline()).outputSchema.print();
 
-  statements << "buffers[thread_id].push_back(record);" << std::endl;
+  statements << "auto idx = buf_sizes[thread_id]++;\n";
+  statements << "buffers[thread_id][idx%BUF_SIZE] = record;" << std::endl;
   if (print) {
-    statements << "std::cout << record.to_string() << std::endl;" << std::endl;
+    statements << "std::cout << buffers[thread_id][idx%BUF_SIZE].to_string() << std::endl;" << std::endl;
   }
 
   std::stringstream intBufferStatement;
-  intBufferStatement << "auto buffers = tbb::concurrent_unordered_map<int, std::vector<record" << cg.currentPipeline() << ">>();";
+  intBufferStatement << "#include <unordered_map>\n";
+  intBufferStatement << "auto buffers = std::unordered_map<int, std::vector<record" << cg.currentPipeline() << ">>();\n";
+  intBufferStatement << "auto buf_sizes = std::vector<size_t>();\n";
   cg.file.addStatement(intBufferStatement.str());
 
   statements << std::endl;

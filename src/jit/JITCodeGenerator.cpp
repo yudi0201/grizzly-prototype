@@ -37,6 +37,10 @@ JITCodeGenerator::JITCodeGenerator(Config &config, Schema &schema, ProfilingData
   open.addInstruction(CMethod::Instruction(INSTRUCTION_SYSTEM, "globalState = g;\n"));
   open.addInstruction(CMethod::Instruction(INSTRUCTION_SYSTEM, "dispatcher = d;\n"));
   open.addInstruction(CMethod::Instruction(INSTRUCTION_SYSTEM, "variant = v;\n"));
+  std::stringstream code;
+  code << "buf_sizes.reserve(dispatcher->parallelism);\n";
+  code << "for (int i=0; i<dispatcher->parallelism; i++) { buffers[i].reserve(BUF_SIZE); buf_sizes[i]=0; }\n";
+  open.addInstruction(CMethod::Instruction(INSTRUCTION_SYSTEM, code.str()));
   getState.addInstruction(
       CMethod::Instruction(INSTRUCTION_SYSTEM, "void** statePtr = (void**)malloc(sizeof(void*)*2);\n"));
 }
@@ -132,6 +136,7 @@ CFile JITCodeGenerator::generate(std::string type, std::string path) {
                         .include("tbb/atomic.h")
                         .addStatement("GlobalState * globalState;")
                         .addStatement("Variant * variant;")
+                        .addStatement("size_t BUF_SIZE=100000;")
                         .build();
   return queryFile;
 }
