@@ -80,16 +80,13 @@ public:
   void consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator);
 };
 
-class CustomAvg : public Aggregation {
+class CustomSum : public Aggregation {
 public:
- CustomAvg() : Aggregation() {}
-
- bool hasFinalAggregation() override;
+ CustomSum() : Aggregation() {}
 
  std::string to_string() { return "CustomAvg(" + fieldId + ")"; };
  void produce(CodeGenerator &cg, Operator *input);
  void consume(CodeGenerator &cg, Operator *input);
- void consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator);
 };
 
 #endif // API_AGGREGATION_H

@@ -481,17 +481,13 @@ void Avg::consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator) {
   cg.pipeline(pipeline - 1).addInstruction(CMethod::Instruction(INSTRUCTION_AGGREGATE, statements.str()));
 }
 
-bool CustomAvg::hasFinalAggregation() { return true; }
-
 /*
- * CustomAvg
+ * CustomSum
  */
-void CustomAvg::produce(CodeGenerator &cg, Operator *input) {
+void CustomSum::produce(CodeGenerator &cg, Operator *input) {
   // add three fields to schema (save count and sum to calculate avg later)
   Schema schema = Schema::create()
-                      .addFixSizeField("payload_avg", DataType::Double, Stream)
                       .addFixSizeField("payload_sum", DataType::Long, Stream)
-                      .addFixSizeField("count", DataType::Long, Stream)
                       .addFixSizeField("window_start", DataType::Long, Stream, "LONG_MAX")
                       .addFixSizeField("window_end", DataType::Long, Stream, "LONG_MIN");
 
@@ -502,7 +498,7 @@ void CustomAvg::produce(CodeGenerator &cg, Operator *input) {
   addStatePtr(cg, input, schema);
 }
 
-void CustomAvg::consume(CodeGenerator &cg, Operator *parent) {
+void CustomSum::consume(CodeGenerator &cg, Operator *parent) {
 
   consume_(cg, parent);
   std::stringstream statements;
@@ -521,7 +517,6 @@ void CustomAvg::consume(CodeGenerator &cg, Operator *parent) {
     }
   }
 
-  statements << oldValue.str() << ".count++;" << std::endl;
   statements << oldValue.str() << ".payload_sum += payload;" << std::endl;
 
   statements << "long old_start; do {\n"
@@ -550,13 +545,4 @@ void CustomAvg::consume(CodeGenerator &cg, Operator *parent) {
   if (parent != nullptr) {
     parent->consume(cg);
   }
-}
-
-void CustomAvg::consumeFinalAggregation(CodeGenerator &cg, Operator *pOperator) {
-  std::stringstream statements;
-  statements << "if(record.count != 0)";
-  statements << "record.payload_avg"
-             << " = "
-             << "((double)record.payload_sum) / ((double)record.count);";
-  cg.pipeline(pipeline - 1).addInstruction(CMethod::Instruction(INSTRUCTION_AGGREGATE, statements.str()));
 }
